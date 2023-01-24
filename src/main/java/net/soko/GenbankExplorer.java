@@ -4,7 +4,6 @@ import picocli.CommandLine;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
@@ -60,7 +59,6 @@ public class GenbankExplorer implements Callable<Integer> {
         ArrayList<GenbankEntry> entries = new ArrayList<>();
         for (File file : contents) {
             if (file.getName().endsWith(".gbff")) {
-                System.out.println(file);
                 entries.addAll(GenbankParser.parseGenbankFile(file));
             }
         }
@@ -74,7 +72,8 @@ public class GenbankExplorer implements Callable<Integer> {
             }
             ArrayList<String> authorsList = new ArrayList<>(authors);
             authorsList.sort(String::compareTo);
-            System.out.println("Authors found:");
+            String outputString = output == null ? "Authors found:" : "Writing to file " + output;
+            System.out.println(outputString);
             for (String author : authorsList) {
                 if (output != null) {
                     writeToFile(output, author);
@@ -91,7 +90,8 @@ public class GenbankExplorer implements Callable<Integer> {
             }
             ArrayList<String> publicationsList = new ArrayList<>(publications);
             publicationsList.sort(String::compareTo);
-            System.out.println("Publications found:");
+            String outputString = output == null ? "Publications found:" : "Writing to file " + output;
+            System.out.println(outputString);
             for (String publication : publicationsList) {
                 if (output != null) {
                     writeToFile(output, publication);
@@ -114,7 +114,8 @@ public class GenbankExplorer implements Callable<Integer> {
             } else {
                 ArrayList<String> publicationsList = new ArrayList<>(publications);
                 publicationsList.sort(String::compareTo);
-                System.out.println("Publications by " + exclusive.byAuthor + ":");
+                String outputString = output == null ? "Publications by " + exclusive.byAuthor + ":" : "Writing to file " + output;
+                System.out.println(outputString);
                 for (String publication : publicationsList) {
                     if (output != null) {
                         writeToFile(output, publication);
@@ -140,9 +141,11 @@ public class GenbankExplorer implements Callable<Integer> {
             } else {
                 ArrayList<String> authorsList = new ArrayList<>(authors);
                 authorsList.sort(String::compareTo);
-                System.out.println("Authors of " + exclusive.byPublication + ":");
+                String outputString = output == null ? "Authors of " + exclusive.byPublication + ":" : "Writing to file " + output;
+                System.out.println(outputString);
                 for (String author : authorsList) {
                     if (output != null) {
+                        System.out.println("Output written to file: " + output.getName());
                         writeToFile(output, author);
                     } else {
                         System.out.println(author);
@@ -154,9 +157,13 @@ public class GenbankExplorer implements Callable<Integer> {
     }
 
     public static void writeToFile(File file, String text) {
+        text += System.lineSeparator();
         try {
-            System.out.println("File created: " + file.getName());
-            Files.writeString(file.toPath(), text, StandardOpenOption.APPEND);
+            if (!file.isFile()) {
+                Files.writeString(file.toPath(), text, StandardOpenOption.CREATE);
+            } else {
+                Files.writeString(file.toPath(), text, StandardOpenOption.APPEND);
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

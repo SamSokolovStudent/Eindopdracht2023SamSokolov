@@ -53,7 +53,7 @@ public class GenbankParser {
                 } else if (line.startsWith("TITLE") && currentReference != null) {
                     StringBuilder sb = new StringBuilder(line.substring(5));
                     while (scanner.hasNextLine() && (line = scanner.nextLine()).startsWith("            ")) {
-                        sb.append(line);
+                        sb.append(line.strip());
                         sb.append(" ");
                     }
                     currentReference.setTitle(sb.toString().strip());
