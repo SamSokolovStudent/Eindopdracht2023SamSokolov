@@ -25,7 +25,7 @@ import static picocli.CommandLine.*;
  *     java -jar genbank_explorer.jar path/to/directory -a -o output.txt
  *     }
  *     </pre>
- *     <p> The program can be run with the following parameters:
+ * <p> The program can be run with the following parameters:
  *     <ul>
  *         <li> Index 0: The directory with the Genbank files to explore. </li>
  *         <li> <strong>-a, --authors</strong>: Display all authors in listed files. </li>
@@ -36,6 +36,7 @@ import static picocli.CommandLine.*;
  *         <li> <strong>-h, --help</strong>: Display the help menu. </li>
  *         </ul>
  * <p><strong>  Limitations</strong> : The program does not support looking for multiple authors or publications at the same time.
+ *
  * @see GenbankParser
  * @see CommandLine
  */
@@ -83,12 +84,16 @@ public class GenbankExplorer implements Callable<Integer> {
     @Option(names = {"-o", "--output"}, description = "Write to a file instead of std-out.")
     private File output;
 
+    @Option(names = {"-g", "--genome"}, description = "Display the genome name of the Genbank entry per search query.")
+    private boolean genome;
+
     /**
      * Main method of the program.
      * <p> Parses the command line arguments and runs the program.
+     *
      * @throws Exception if unable to compute a result as per {@link Callable#call()}
      */
-    public Integer call() throws Exception{
+    public Integer call() throws Exception {
         // Get all files in the directory and check if the directory exists / are valid
         if (!directory.exists()) {
             System.err.println("Directory " + directory + " does not exist");

@@ -58,7 +58,8 @@ public class GenbankParser {
                         entries.add(currentEntry);
                     }
                     currentEntry = new GenbankEntry();
-                    currentEntry.setLocus(line);
+                    String[] parts = line.split("\\s+");
+                    currentEntry.setLocus(parts[1]);
                 } else if (line.startsWith("ACCESSION") && currentEntry != null) {
                     currentEntry.setAccession(line);
                 } else if (line.startsWith("DEFINITION") && currentEntry != null) {
