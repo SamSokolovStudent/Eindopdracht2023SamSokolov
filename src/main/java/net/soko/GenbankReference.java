@@ -3,17 +3,50 @@ package net.soko;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * This class represents a Genbank reference. It contains the authors, title, journals and PubMed ID.
+ * <p> <strong>Example usage:</strong>
+ * <pre>
+ *     {@code
+ *     GenbankReference reference = new GenbankReference();
+ *     reference.addAuthor("Smith");
+ *     reference.addAuthor("Jones");
+ *     reference.setTitle("The genome of Homo sapiens");
+ *     reference.setJournals("Nature");
+ *     reference.setPubmedId(12345);
+ */
 public class GenbankReference {
+    /**
+     * The authors of this reference.
+     * A set is used to avoid duplicates.
+     */
     private Set<String> authors = new HashSet<>();
+    /**
+     * The title of this reference.
+     */
     private String title = "unknown";
-    private String journals = "unknown";
+    /**
+     * The journal of this reference.
+     */
+    private String journal = "unknown";
+    /**
+     * The PubMed ID of this reference.
+     */
     private int pubmedId;
 
+    /**
+     * Adds an author to the set of authors.
+     * @param author The author to add.
+     * @return The set of authors.
+     */
     public Set<String> addAuthor(String author) {
         this.authors.add(author);
         return this.authors;
     }
 
+    /*
+    Getters and setters for the fields.
+     */
     public Set<String> getAuthors() {
         return authors;
     }
@@ -30,12 +63,12 @@ public class GenbankReference {
         this.title = title;
     }
 
-    public String getJournals() {
-        return journals;
+    public String getJournal() {
+        return journal;
     }
 
-    public void setJournals(String journals) {
-        this.journals = journals;
+    public void setJournal(String journal) {
+        this.journal = journal;
     }
 
     public int getPubmedId() {
