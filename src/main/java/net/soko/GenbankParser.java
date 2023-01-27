@@ -1,9 +1,9 @@
 package net.soko;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.zip.GZIPInputStream;
 
 /**
  * This parser class is used to parse 'Genbank Flat Files' or 'gbff' and extract the relevant information for the command line explorer.
@@ -125,5 +125,36 @@ public class GenbankParser {
         // Add the last entry to the list
         entries.add(currentEntry);
         return entries;
+    }
+
+    /**
+     * Method to unzip a Genbank file in case it is compressed.
+     * <p>
+     *     The method creates a temporary file to store the uncompressed file which is deleted on exit,
+     *     it is called in the {@link GenbankExplorer#call()} method whenever the file ends with ".gz".
+     *     The method is based on an example found on <a href="https://www.digitalocean.com/community/tutorials/java-gzip-example-compress-decompress-file">Digital Ocean</a>
+     *
+     * @param file The file to be uncompressed.
+     * @return The uncompressed file.
+     * @see GenbankExplorer#call()
+     */
+    public static File gUnzip(File file)  {
+        	File newFile = null;
+        	try {
+        		newFile = File.createTempFile("genbank", ".gbff");
+        		newFile.deleteOnExit();
+        		GZIPInputStream gzipInputStream = new GZIPInputStream(new FileInputStream(file));
+        		FileOutputStream fileOutputStream = new FileOutputStream(newFile);
+        		byte[] buffer = new byte[1024];
+        		int len;
+        		while ((len = gzipInputStream.read(buffer)) != -1) {
+        			fileOutputStream.write(buffer, 0, len);
+        		}
+        		gzipInputStream.close();
+        		fileOutputStream.close();
+        	} catch (IOException e) {
+        		e.printStackTrace();
+        	}
+        	return newFile;
     }
 }

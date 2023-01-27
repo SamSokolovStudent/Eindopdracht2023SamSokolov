@@ -37,6 +37,9 @@ public class GenbankEntry {
      */
     private List<GenbankReference> references = new ArrayList<>();
 
+
+
+
     /*
     Getters and setters for the fields.
      */

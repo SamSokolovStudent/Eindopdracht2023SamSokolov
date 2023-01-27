@@ -33,7 +33,6 @@ public class GenbankReference {
      * The PubMed ID of this reference.
      */
     private int pubmedId;
-    private String locus = "unknown";
 
     /**
      * Adds an author to the set of authors.
@@ -43,10 +42,6 @@ public class GenbankReference {
     public Set<String> addAuthor(String author) {
         this.authors.add(author);
         return this.authors;
-    }
-
-    public String authorAndLocus() {
-        return String.join(", ", this.authors) + " (" + this.locus + ")";
     }
 
     /*
@@ -68,10 +63,6 @@ public class GenbankReference {
         this.title = title;
     }
 
-    public void setLocus(String locus) {
-        this.locus = locus;
-    }
-
     public String getJournal() {
         return journal;
     }
@@ -88,7 +79,4 @@ public class GenbankReference {
         this.pubmedId = pubmedId;
     }
 
-    public String getLocus() {
-        return locus;
-    }
 }

@@ -109,6 +109,8 @@ public class GenbankExplorer implements Callable<Integer> {
             // Check if the file is a Genbank Flat File
             if (file.getName().endsWith(".gbff")) {
                 entries.addAll(GenbankParser.parseGenbankFile(file));
+            } else if (file.getName().endsWith(".gz")) {
+                entries.addAll(GenbankParser.parseGenbankFile(GenbankParser.gUnzip(file)));
             } else {
                 System.err.println("File " + file + " is not a Genbank Flat File");
             }
