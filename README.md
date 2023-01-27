@@ -30,6 +30,8 @@ The program is broken up into 4 classes:
 - `GenbankEntry`: Stores information such as locus, etc.
 - `GenbankReference`: Stores information such as author and journal.
 
+The `GenbankEntry` objects are stored in a list for use with the commands.
+
 ![image](https://user-images.githubusercontent.com/90578942/215222542-134fae4e-f9c8-4049-8747-326af34bd940.png)
 
 Testing files for this project with which this program is known to work are stored under ./src/main/resources/genbank/*
@@ -41,15 +43,14 @@ These commands were run from within IntelliJ under 'gradle/run' and are known to
 ![image](https://user-images.githubusercontent.com/90578942/215222454-ef54e729-d5c9-4a3f-b7d8-02a2c6f879c1.png)
 
 Listing authors
-`run --args="./src/main/resources/genbank/ -a"
+`run --args="./src/main/resources/genbank/ -a"`
+
 Listing genomes related to author
 `run --args="./src/main/resources/genbank/ -ag Thayer,N."`
+
 etc.
 
-![image](https://user-images.githubusercontent.com/90578942/215222483-6eb6572e-fe5d-4c28-85e5-7e79ff6d7ac7.png)![image](https://user-images.githubusercontent.com/90578942/215222921-092064b3-4b9e-4545-9676-7de03f275609.png)
-
-
-The `GenbankEntry` objects are stored in a list for use with the commands.
+![image](https://user-images.githubusercontent.com/90578942/215222483-6eb6572e-fe5d-4c28-85e5-7e79ff6d7ac7.png)
 
 ## Extra Information
 The program is documented according to Javadoc standards and is self documented where needed by means of clear and concise identifiers/variable names.
