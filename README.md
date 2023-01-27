@@ -1,6 +1,6 @@
 # Eindopdracht 2023 SamSokolov
 
-This project is a program that is able to read genbank flat file (.gbff) files and store the data in a list. The program allows users to view the genes associated with a particular person or publication and also makes it possible to search for an author in the list. It also allows navigation between an author and a publication and the ability to select an author or publication to write to a file with all associated data. The program is a command line tool and is designed to run on Unix machines (linux & mac).
+This project is a program that is able to read genbank flat file (.gbff) files and store the data in a list. The program allows users to view the genes associated with a particular person or publication and also makes it possible to search for an author in the list. It also allows navigation between an author and a publication and the ability to select an author or publication to write to a file with all associated data. The program has been tested to work on both Unix machines as well as Windows.
 
 ## Installation
 
