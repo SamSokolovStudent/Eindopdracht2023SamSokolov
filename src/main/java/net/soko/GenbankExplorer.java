@@ -76,6 +76,14 @@ public class GenbankExplorer implements Callable<Integer> {
         // Enter a publication to display all authors of that publication
         @Option(names = {"-bp", "--by-publication"}, description = "Enter a publication to display all authors of that publication. Works with partial names", required = true)
         private String byPublication;
+
+        // Enter an author to display all genomes that author has worked on
+        @Option(names = {"-ag", "--auth-genome"}, description = "Enter an author to display all genomes that author has worked on.", required = true)
+        private String authGenome;
+
+        // Enter a publication to display all genomes that are associated with that publication.
+        @Option(names = {"-pg", "--pub-genome"}, description = "Enter a publication to display all genomes that are associated with that publication.", required = true)
+        private String pubGenome;
     }
 
     /**
@@ -83,9 +91,6 @@ public class GenbankExplorer implements Callable<Integer> {
      */
     @Option(names = {"-o", "--output"}, description = "Write to a file instead of std-out.")
     private File output;
-
-    @Option(names = {"-g", "--genome"}, description = "Display the genome name of the Genbank entry per search query.")
-    private boolean genome;
 
     /**
      * Main method of the program.
@@ -117,6 +122,7 @@ public class GenbankExplorer implements Callable<Integer> {
         }
 
         // Give results based on the CL exclusive parameters.
+        // Display authors
         if (exclusive.authors) {
             // HashSet to store all unique authors from entries and ArrayList to sort them alphabetically.
             HashSet<String> authors = new HashSet<>();
@@ -137,6 +143,7 @@ public class GenbankExplorer implements Callable<Integer> {
                     System.out.println(author);
                 }
             }
+            // Display publications
         } else if (exclusive.publications) {
             HashSet<String> publications = new HashSet<>();
             for (GenbankEntry entry : entries) {
@@ -155,6 +162,7 @@ public class GenbankExplorer implements Callable<Integer> {
                     System.out.println(publication);
                 }
             }
+            // Display publications by author
         } else if (exclusive.byAuthor != null) {
             HashSet<String> publications = new HashSet<>();
             for (GenbankEntry entry : entries) {
@@ -180,6 +188,7 @@ public class GenbankExplorer implements Callable<Integer> {
                     }
                 }
             }
+            // Display authors by publication
         } else if (exclusive.byPublication != null) {
             HashSet<String> authors = new HashSet<>();
             out:
@@ -205,6 +214,55 @@ public class GenbankExplorer implements Callable<Integer> {
                         writeToFile(output, author);
                     } else {
                         System.out.println(author);
+                    }
+                }
+            }
+        } else if (exclusive.authGenome != null) {
+            HashSet<String> locus = new HashSet<>();
+            for (GenbankEntry entry : entries) {
+                for (GenbankReference reference : entry.getReferences()) {
+                    if (reference.getAuthors().contains(exclusive.authGenome)) {
+                        locus.add(entry.getLocus());
+                    }
+                }
+            }
+            if (locus.isEmpty()) {
+                System.out.println("No genomes found for " + exclusive.authGenome);
+                System.out.println("Please type an exact match for the author's name. For example, \"Reilly,L.P.\" instead of \"Reilly\".");
+            } else {
+                ArrayList<String> locusList = new ArrayList<>(locus);
+                locusList.sort(String::compareTo);
+                String outputString = output == null ? "Genomes by " + exclusive.authGenome + ":" : "Writing to file " + output;
+                System.out.println(outputString);
+                for (String locusName : locusList) {
+                    if (output != null) {
+                        writeToFile(output, locusName);
+                    } else {
+                        System.out.println(locusName);
+                    }
+                }
+            }
+        } else if (exclusive.pubGenome != null) {
+            HashSet<String> locus = new HashSet<>();
+            for (GenbankEntry entry : entries) {
+                for (GenbankReference reference : entry.getReferences()) {
+                    if (reference.getTitle().contains(exclusive.pubGenome)) {
+                        locus.add(entry.getLocus());
+                    }
+                }
+            }
+            if (locus.isEmpty()) {
+                System.out.println("No genomes found for " + exclusive.pubGenome);
+            } else {
+                ArrayList<String> locusList = new ArrayList<>(locus);
+                locusList.sort(String::compareTo);
+                String outputString = output == null ? "Genomes of " + exclusive.pubGenome + ":" : "Writing to file " + output;
+                System.out.println(outputString);
+                for (String locusName : locusList) {
+                    if (output != null) {
+                        writeToFile(output, locusName);
+                    } else {
+                        System.out.println(locusName);
                     }
                 }
             }
