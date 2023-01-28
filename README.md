@@ -7,6 +7,8 @@ This project is a program that is able to read genbank flat file (.gbff) files a
 The program uses gradle and the build can be found in `./build/libs/eindopdracht-1.0-SNAPSHOT.jar`.
 In case a build isn't present you can build the program yourself by cloning the repository and running ./gradlew build.
 
+Repository can be cloned into IDE of choice or downloaded as a .zip and opening the project.
+
 ## Usage
 The tool will always need an input directory, it can handle both .gz files and .gbff files. 
 All files in the directory must be of either of these types. 
