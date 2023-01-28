@@ -57,7 +57,7 @@ public class GenbankExplorer implements Callable<Integer> {
      * enter an author to display all publications by that author, or enter a publication to display all authors of that publication.
      * <p> If the user does not enter any of these parameters, an error is printed to the console and the program exits.
      */
-    @ArgGroup(exclusive = true, multiplicity = "1")
+    @ArgGroup(multiplicity = "1")
     Exclusive exclusive;
 
     static class Exclusive {
@@ -99,86 +99,62 @@ public class GenbankExplorer implements Callable<Integer> {
      * @throws Exception if unable to compute a result as per {@link Callable#call()}
      */
     public Integer call() throws Exception {
-        // Get all files in the directory and check if the directory exists / are valid
-        if (!directory.exists()) {
-            System.err.println("Directory " + directory + " does not exist");
-            return 1;
-        }
-        File[] contents = directory.listFiles();
-        if (contents == null) {
-            System.err.println("Directory " + directory + " is not a directory");
-            return 1;
-        }
-        ArrayList<GenbankEntry> entries = new ArrayList<>();
-        for (File file : contents) {
-            // Check if the file is a Genbank Flat File
-            if (file.getName().endsWith(".gbff")) {
-                entries.addAll(GenbankParser.parseGenbankFile(file));
-            } else if (file.getName().endsWith(".gz")) {
-                entries.addAll(GenbankParser.parseGenbankFile(GenbankParser.gUnzip(file)));
-            } else {
-                System.err.println("File " + file + " is not a Genbank Flat File");
+        try {
+            // Get all files in the directory and check if the directory exists / are valid
+            if (!directory.exists()) {
+                System.err.println("Directory " + directory + " does not exist");
+                return 1;
             }
-        }
+            File[] contents = directory.listFiles();
+            if (contents == null) {
+                System.err.println("Directory " + directory + " is not a directory");
+                return 1;
+            }
+            ArrayList<GenbankEntry> entries = new ArrayList<>();
+            for (File file : contents) {
+                // Check if the file is a Genbank Flat File
+                if (file.getName().endsWith(".gbff")) {
+                    entries.addAll(GenbankParser.parseGenbankFile(file));
+                } else if (file.getName().endsWith(".gz")) {
+                    entries.addAll(GenbankParser.parseGenbankFile(GenbankParser.gUnzip(file)));
+                } else {
+                    System.err.println("File " + file + " is not a Genbank Flat File");
+                }
+            }
 
-        // Give results based on the CL exclusive parameters.
-        // Display authors
-        if (exclusive.authors) {
-            // HashSet to store all unique authors from entries and ArrayList to sort them alphabetically.
-            HashSet<String> authors = new HashSet<>();
-            for (GenbankEntry entry : entries) {
-                for (GenbankReference reference : entry.getReferences()) {
-                    authors.addAll(reference.getAuthors());
+            // Give results based on the CL exclusive parameters.
+            // Display authors
+            if (exclusive.authors) {
+                // HashSet to store all unique authors from entries and ArrayList to sort them alphabetically.
+                HashSet<String> authors = new HashSet<>();
+                for (GenbankEntry entry : entries) {
+                    for (GenbankReference reference : entry.getReferences()) {
+                        authors.addAll(reference.getAuthors());
+                    }
                 }
-            }
-            ArrayList<String> authorsList = new ArrayList<>(authors);
-            authorsList.sort(String::compareTo);
-            String outputString = output == null ? "Authors found:" : "Writing to file " + output;
-            System.out.println(outputString);
-            // Write to file if output is not null, otherwise print to std-out. This pattern is used for all other CL parameters as well.
-            for (String author : authorsList) {
-                if (output != null) {
-                    writeToFile(output, author);
-                } else {
-                    System.out.println(author);
+                ArrayList<String> authorsList = new ArrayList<>(authors);
+                authorsList.sort(String::compareTo);
+                String outputString = output == null ? "Authors found:" : "Writing to file " + output;
+                System.out.println(outputString);
+                // Write to file if output is not null, otherwise print to std-out. This pattern is used for all other CL parameters as well.
+                for (String author : authorsList) {
+                    if (output != null) {
+                        writeToFile(output, author);
+                    } else {
+                        System.out.println(author);
+                    }
                 }
-            }
-            // Display publications
-        } else if (exclusive.publications) {
-            HashSet<String> publications = new HashSet<>();
-            for (GenbankEntry entry : entries) {
-                for (GenbankReference reference : entry.getReferences()) {
-                    publications.add(reference.getTitle());
-                }
-            }
-            ArrayList<String> publicationsList = new ArrayList<>(publications);
-            publicationsList.sort(String::compareTo);
-            String outputString = output == null ? "Publications found:" : "Writing to file " + output;
-            System.out.println(outputString);
-            for (String publication : publicationsList) {
-                if (output != null) {
-                    writeToFile(output, publication);
-                } else {
-                    System.out.println(publication);
-                }
-            }
-            // Display publications by author
-        } else if (exclusive.byAuthor != null) {
-            HashSet<String> publications = new HashSet<>();
-            for (GenbankEntry entry : entries) {
-                for (GenbankReference reference : entry.getReferences()) {
-                    if (reference.getAuthors().contains(exclusive.byAuthor)) {
+                // Display publications
+            } else if (exclusive.publications) {
+                HashSet<String> publications = new HashSet<>();
+                for (GenbankEntry entry : entries) {
+                    for (GenbankReference reference : entry.getReferences()) {
                         publications.add(reference.getTitle());
                     }
                 }
-            }
-            if (publications.isEmpty()) {
-                System.out.println("No publications found for " + exclusive.byAuthor);
-                System.out.println("Please type an exact match for the author's name. For example, \"Reilly,L.P.\" instead of \"Reilly\".");
-            } else {
                 ArrayList<String> publicationsList = new ArrayList<>(publications);
                 publicationsList.sort(String::compareTo);
-                String outputString = output == null ? "Publications by " + exclusive.byAuthor + ":" : "Writing to file " + output;
+                String outputString = output == null ? "Publications found:" : "Writing to file " + output;
                 System.out.println(outputString);
                 for (String publication : publicationsList) {
                     if (output != null) {
@@ -187,89 +163,122 @@ public class GenbankExplorer implements Callable<Integer> {
                         System.out.println(publication);
                     }
                 }
-            }
-            // Display authors by publication
-        } else if (exclusive.byPublication != null) {
-            HashSet<String> authors = new HashSet<>();
-            out:
-            for (GenbankEntry entry : entries) {
-                for (GenbankReference reference : entry.getReferences()) {
-                    if (reference.getTitle().contains(exclusive.byPublication)) {
-                        authors.addAll(reference.getAuthors());
-                        // Atari
-                        break out;
+                // Display publications by author
+            } else if (exclusive.byAuthor != null) {
+                HashSet<String> publications = new HashSet<>();
+                for (GenbankEntry entry : entries) {
+                    for (GenbankReference reference : entry.getReferences()) {
+                        if (reference.getAuthors().contains(exclusive.byAuthor)) {
+                            publications.add(reference.getTitle());
+                        }
                     }
                 }
-            }
-            if (authors.isEmpty()) {
-                System.out.println("No authors found for " + exclusive.byPublication);
+                if (publications.isEmpty()) {
+                    System.out.println("No publications found for " + exclusive.byAuthor);
+                    System.out.println("Please type an exact match for the author's name. For example, \"Reilly,L.P.\" instead of \"Reilly\".");
+                } else {
+                    ArrayList<String> publicationsList = new ArrayList<>(publications);
+                    publicationsList.sort(String::compareTo);
+                    String outputString = output == null ? "Publications by " + exclusive.byAuthor + ":" : "Writing to file " + output;
+                    System.out.println(outputString);
+                    for (String publication : publicationsList) {
+                        if (output != null) {
+                            writeToFile(output, publication);
+                        } else {
+                            System.out.println(publication);
+                        }
+                    }
+                }
+                // Display authors by publication
+            } else if (exclusive.byPublication != null) {
+                HashSet<String> authors = new HashSet<>();
+                out:
+                for (GenbankEntry entry : entries) {
+                    for (GenbankReference reference : entry.getReferences()) {
+                        if (reference.getTitle().contains(exclusive.byPublication)) {
+                            authors.addAll(reference.getAuthors());
+                            // Atari
+                            break out;
+                        }
+                    }
+                }
+                if (authors.isEmpty()) {
+                    System.out.println("No authors found for " + exclusive.byPublication);
+                } else {
+                    ArrayList<String> authorsList = new ArrayList<>(authors);
+                    authorsList.sort(String::compareTo);
+                    String outputString = output == null ? "Authors of " + exclusive.byPublication + ":" : "Writing to file " + output;
+                    System.out.println(outputString);
+                    for (String author : authorsList) {
+                        if (output != null) {
+                            System.out.println("Output written to file: " + output.getName());
+                            writeToFile(output, author);
+                        } else {
+                            System.out.println(author);
+                        }
+                    }
+                }
+                // Display genomes by author
+            } else if (exclusive.authGenome != null) {
+                HashSet<String> locus = new HashSet<>();
+                for (GenbankEntry entry : entries) {
+                    for (GenbankReference reference : entry.getReferences()) {
+                        if (reference.getAuthors().contains(exclusive.authGenome)) {
+                            locus.add(entry.getLocus());
+                        }
+                    }
+                }
+                if (locus.isEmpty()) {
+                    System.out.println("No genomes found for " + exclusive.authGenome);
+                    System.out.println("Please type an exact match for the author's name. For example, \"Reilly,L.P.\" instead of \"Reilly\".");
+                } else {
+                    ArrayList<String> locusList = new ArrayList<>(locus);
+                    locusList.sort(String::compareTo);
+                    String outputString = output == null ? "Genomes by " + exclusive.authGenome + ":" : "Writing to file " + output;
+                    System.out.println(outputString);
+                    for (String locusName : locusList) {
+                        if (output != null) {
+                            writeToFile(output, locusName);
+                        } else {
+                            System.out.println(locusName);
+                        }
+                    }
+                }
+                // Display genomes by publication
+            } else if (exclusive.pubGenome != null) {
+                HashSet<String> locus = new HashSet<>();
+                for (GenbankEntry entry : entries) {
+                    for (GenbankReference reference : entry.getReferences()) {
+                        if (reference.getTitle().contains(exclusive.pubGenome)) {
+                            locus.add(entry.getLocus());
+                        }
+                    }
+                }
+                if (locus.isEmpty()) {
+                    System.out.println("No genomes found for " + exclusive.pubGenome);
+                } else {
+                    ArrayList<String> locusList = new ArrayList<>(locus);
+                    locusList.sort(String::compareTo);
+                    String outputString = output == null ? "Genomes of " + exclusive.pubGenome + ":" : "Writing to file " + output;
+                    System.out.println(outputString);
+                    for (String locusName : locusList) {
+                        if (output != null) {
+                            writeToFile(output, locusName);
+                        } else {
+                            System.out.println(locusName);
+                        }
+                    }
+                }
+                // If no options are selected, print error message.
             } else {
-                ArrayList<String> authorsList = new ArrayList<>(authors);
-                authorsList.sort(String::compareTo);
-                String outputString = output == null ? "Authors of " + exclusive.byPublication + ":" : "Writing to file " + output;
-                System.out.println(outputString);
-                for (String author : authorsList) {
-                    if (output != null) {
-                        System.out.println("Output written to file: " + output.getName());
-                        writeToFile(output, author);
-                    } else {
-                        System.out.println(author);
-                    }
-                }
+                System.err.println("No options selected.\n" +
+                        "Use -h or --help for help.");
             }
-        } else if (exclusive.authGenome != null) {
-            HashSet<String> locus = new HashSet<>();
-            for (GenbankEntry entry : entries) {
-                for (GenbankReference reference : entry.getReferences()) {
-                    if (reference.getAuthors().contains(exclusive.authGenome)) {
-                        locus.add(entry.getLocus());
-                    }
-                }
-            }
-            if (locus.isEmpty()) {
-                System.out.println("No genomes found for " + exclusive.authGenome);
-                System.out.println("Please type an exact match for the author's name. For example, \"Reilly,L.P.\" instead of \"Reilly\".");
-            } else {
-                ArrayList<String> locusList = new ArrayList<>(locus);
-                locusList.sort(String::compareTo);
-                String outputString = output == null ? "Genomes by " + exclusive.authGenome + ":" : "Writing to file " + output;
-                System.out.println(outputString);
-                for (String locusName : locusList) {
-                    if (output != null) {
-                        writeToFile(output, locusName);
-                    } else {
-                        System.out.println(locusName);
-                    }
-                }
-            }
-        } else if (exclusive.pubGenome != null) {
-            HashSet<String> locus = new HashSet<>();
-            for (GenbankEntry entry : entries) {
-                for (GenbankReference reference : entry.getReferences()) {
-                    if (reference.getTitle().contains(exclusive.pubGenome)) {
-                        locus.add(entry.getLocus());
-                    }
-                }
-            }
-            if (locus.isEmpty()) {
-                System.out.println("No genomes found for " + exclusive.pubGenome);
-            } else {
-                ArrayList<String> locusList = new ArrayList<>(locus);
-                locusList.sort(String::compareTo);
-                String outputString = output == null ? "Genomes of " + exclusive.pubGenome + ":" : "Writing to file " + output;
-                System.out.println(outputString);
-                for (String locusName : locusList) {
-                    if (output != null) {
-                        writeToFile(output, locusName);
-                    } else {
-                        System.out.println(locusName);
-                    }
-                }
-            }
-        } else {
-            System.err.println("No options selected");
-            return 1;
+
+        } catch (Exception e) {
+            throw new Exception(e);
         }
+
         return 0;
     }
 

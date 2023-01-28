@@ -36,21 +36,23 @@ public class GenbankReference {
 
     /**
      * Adds an author to the set of authors.
+     *
      * @param author The author to add.
-     * @return The set of authors.
      */
-    public Set<String> addAuthor(String author) {
+    public void addAuthor(String author) {
         this.authors.add(author);
-        return this.authors;
     }
 
     /*
     Getters and setters for the fields.
+    Unused methods are retained, possibly for future use.
      */
+
     public Set<String> getAuthors() {
         return authors;
     }
 
+    @SuppressWarnings("unused")
     public void setAuthors(Set<String> authors) {
         this.authors = authors;
     }
@@ -63,6 +65,7 @@ public class GenbankReference {
         this.title = title;
     }
 
+    @SuppressWarnings("unused")
     public String getJournal() {
         return journal;
     }
@@ -71,6 +74,7 @@ public class GenbankReference {
         this.journal = journal;
     }
 
+    @SuppressWarnings("unused")
     public int getPubmedId() {
         return pubmedId;
     }

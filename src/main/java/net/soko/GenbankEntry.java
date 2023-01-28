@@ -39,7 +39,10 @@ public class GenbankEntry {
 
     /*
     Getters and setters for the fields.
+    Unused methods are retained, possibly for future use.
      */
+
+    @SuppressWarnings("unused")
     public String getAccession() {
         return accession;
     }
@@ -56,6 +59,7 @@ public class GenbankEntry {
         this.locus = locus;
     }
 
+    @SuppressWarnings("unused")
     public String getDefinition() {
         return definition;
     }
@@ -68,6 +72,7 @@ public class GenbankEntry {
         return references;
     }
 
+    @SuppressWarnings("unused")
     public void setReferences(List<GenbankReference> references) {
         this.references = references;
     }
